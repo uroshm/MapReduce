@@ -81,23 +81,4 @@ public class Orchestrator {
             // TODO: implement logic here
         }
     }
-
-    void partitionRoundRobin(Map<String, Integer> mappedData) throws InterruptedException {
-        int reducerIndex = 0;
-        var numberOfReducers = reducers.size();
-        for (var entry : mappedData.entrySet()) {
-            var targetReducer = reducers.get(reducerIndex);
-            targetReducer.getQueue().put(Map.of(entry.getKey(), entry.getValue()));
-            reducerIndex = (reducerIndex + 1) % numberOfReducers;
-        }
-    }
-
-    public void runReducers() {
-        reducerQueues = new ArrayList<>();
-        for (var reducer : reducers) {
-            Thread reducerThread = new Thread(reducer);
-            reducerThread.start();
-            reducerQueues.add(reducer.getQueue());
-        }
-    }
 }
