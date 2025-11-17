@@ -16,6 +16,7 @@ public class Reducer implements Runnable {
     private boolean isRunning;
     private long recordsProcessed;
     private long timeSpent;
+    private int POLL_TIME_SECONDS = 2;
 
     @Override
     public void run() {
@@ -24,7 +25,7 @@ public class Reducer implements Runnable {
         var result = new HashMap<String, Integer>();
         try {
             while (true) {
-                Map<String, Integer> batch = queue.poll(1, TimeUnit.SECONDS);
+                Map<String, Integer> batch = queue.poll(POLL_TIME_SECONDS, TimeUnit.SECONDS);
                 if (batch == null)
                     break;
                 for (var e : batch.entrySet()) {       
