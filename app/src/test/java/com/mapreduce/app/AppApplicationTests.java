@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.mapreduce.app.data.PartitionStrategy;
 import com.mapreduce.app.data.Tweet;
 import com.mapreduce.app.service.Orchestrator;
 
@@ -19,20 +20,50 @@ class AppApplicationTests {
 	private Orchestrator orchestrator;
 
 	@Test
-	void createTweets() throws Exception {
+	void partitionNaiveHash() throws Exception {
 		var tweets = generateTweets();
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
+		orchestrator.runMappers(PartitionStrategy.NAIVE_HASH);
+		orchestrator.getReducers().forEach(reducer -> {
+			var thread = new Thread(reducer);
+			thread.start();
+		});
+
+		Thread.sleep(5000);
+		orchestrator.getReducers().forEach(reducer -> {
+			reducer.getResult().forEach((key, value) -> {
+				System.out.println(key + ": " + value);
+			});
+		});
+	}
+
+	@Test
+	void partitionEquallyWeighted() throws Exception {
+		var tweets = generateTweets();
+		orchestrator.initializeMappers(tweets, 4);
+		orchestrator.initializeReducers(2);
+		orchestrator.runMappers(PartitionStrategy.EQUALLY_WEIGHTED);
+		orchestrator.getReducers().forEach(reducer -> {
+			var thread = new Thread(reducer);
+			thread.start();
+		});
+
+		Thread.sleep(5000);
+		orchestrator.getReducers().forEach(reducer -> {
+			reducer.getResult().forEach((key, value) -> {
+				System.out.println(key + ": " + value);
+			});
+		});
 	}
 
 	private List<Tweet> generateTweets() {
 
 		Map<String, Integer> hashtags = Map.of(
-				"#Basketball", 500,
-				"#Soccer", 5000,
-				"#Football", 500,
-				"#Boxing", 250,
-				"#MMA", 250);
+				"#Basketball", 5000,
+				"#Soccer", 50000000,
+				"#Football", 5000,
+				"#Boxing", 2500);
 
 		ArrayList<Tweet> tweets = new ArrayList<>();
 		for (var entry : hashtags.entrySet()) {
