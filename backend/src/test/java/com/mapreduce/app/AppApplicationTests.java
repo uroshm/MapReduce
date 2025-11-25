@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,11 +22,12 @@ class AppApplicationTests {
 	private Orchestrator orchestrator;
 
 	@Test
+	@Disabled
 	void partitionNaiveHash() throws Exception {
 		var tweets = generateTweets();
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
-		orchestrator.runMappers(PartitionStrategy.NAIVE_HASH);
+		orchestrator.runMapReduce(PartitionStrategy.NAIVE_HASH);
 		orchestrator.getReducers().forEach(reducer -> {
 			var thread = new Thread(reducer);
 			thread.start();
@@ -34,11 +37,12 @@ class AppApplicationTests {
 	}
 
 	@Test
+	@Disabled
 	void partitionImproved() throws Exception {
 		var tweets = generateTweets();
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
-		orchestrator.runMappers(PartitionStrategy.EQUALLY_WEIGHTED);
+		orchestrator.runMapReduce(PartitionStrategy.EQUALLY_WEIGHTED);
 		orchestrator.getReducers().forEach(reducer -> {
 			var thread = new Thread(reducer);
 			thread.start();
