@@ -1,23 +1,12 @@
 package com.mapreduce.app.service;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import com.mapreduce.app.data.PartitionStrategy;
@@ -30,10 +19,19 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class Orchestrator {
-    List<Mapper> mappers;
-    List<Reducer> reducers;
+    List<Mapper> mappers = new ArrayList<>();
+    List<Reducer> reducers = new ArrayList<>();
     List<BlockingQueue<Map<String, Integer>>> reducerQueues = new ArrayList<>();
-    ExecutorService mapperPool;
+    ExecutorService mapperPool = null;
+
+    public void reset() {
+        mappers = new ArrayList<>();
+        reducers = new ArrayList<>();
+        reducerQueues = new ArrayList<>();
+        if (mapperPool != null && !mapperPool.isShutdown()) {
+            mapperPool.shutdownNow();
+        }
+    }
 
     public void initializeMappers(List<Tweet> tweets, int numberOfMappers) {
         var chunkSize = tweets.size() / numberOfMappers;
@@ -45,7 +43,7 @@ public class Orchestrator {
         }
     }
 
-    public void runMappers(PartitionStrategy partitionStrategy) throws Exception {
+    public void runMapReduce(PartitionStrategy partitionStrategy) throws Exception {
         var futures = new ArrayList<Future<Map<String, Integer>>>();
         for (var mapper : mappers) {
             futures.add(mapperPool.submit(mapper));
@@ -91,7 +89,7 @@ public class Orchestrator {
     // Refinement One
     public void partitionLoadAware(Map<String, Integer> mappedData) throws InterruptedException {
         var keys = mappedData.keySet().toArray();
-        var hotKeys = getHotKeys(mappedData,500);
+        var hotKeys = getHotKeys(mappedData, 500);
         var counter = 0;
         var hashtagsPerReducer = mappedData.size() / reducers.size();
         for (int i = 0; i < reducers.size(); i++) {
@@ -104,10 +102,28 @@ public class Orchestrator {
 
     private List<String> getHotKeys(Map<String, Integer> mappedData, int threshold) {
         var hotKeys = new ArrayList<String>();
-        for(var entry : mappedData.entrySet()) {
-            if(entry.getValue()>=threshold)
+        for (var entry : mappedData.entrySet()) {
+            if (entry.getValue() >= threshold)
                 hotKeys.add(entry.getKey());
         }
         return hotKeys;
+    }
+
+    public String collectResults() {
+        var builder = new StringBuilder();
+        try {
+            Thread.sleep(10000);
+            reducers.forEach(reducer -> {
+                reducer.getResult().forEach((key, value) -> {
+                    builder.append(
+                            reducer.getName() + " ;; timeSpent: " + reducer.getTimeSpent() + "ms ;; " + key + ": "
+                                    + value);
+                });
+            });
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
     }
 }
