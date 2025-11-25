@@ -6,4 +6,4 @@ Then, an improvement using intelligent load balancing will be implemented to sho
 
 ## Testing
 
-Run the createTweets test in AppApplicationTests.java.
+Run tests in AppApplicationTests.java.
