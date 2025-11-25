@@ -30,16 +30,11 @@ class AppApplicationTests {
 			thread.start();
 		});
 
-		Thread.sleep(5000);
-		orchestrator.getReducers().forEach(reducer -> {
-			reducer.getResult().forEach((key, value) -> {
-				System.out.println(key + ": " + value);
-			});
-		});
+		printResults();
 	}
 
 	@Test
-	void partitionEquallyWeighted() throws Exception {
+	void partitionImproved() throws Exception {
 		var tweets = generateTweets();
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
@@ -49,10 +44,15 @@ class AppApplicationTests {
 			thread.start();
 		});
 
-		Thread.sleep(5000);
+		printResults();
+	}
+
+	private void printResults() throws InterruptedException {
+		Thread.sleep(10000);
 		orchestrator.getReducers().forEach(reducer -> {
 			reducer.getResult().forEach((key, value) -> {
-				System.out.println(key + ": " + value);
+				System.out.println(
+						reducer.getName() + " ;; timeSpent: " + reducer.getTimeSpent() + "ms ;; " + key + ": " + value);
 			});
 		});
 	}
@@ -60,10 +60,12 @@ class AppApplicationTests {
 	private List<Tweet> generateTweets() {
 
 		Map<String, Integer> hashtags = Map.of(
-				"#Basketball", 5000,
-				"#Soccer", 50000000,
-				"#Football", 5000,
-				"#Boxing", 2500);
+				"#Basketball", 200,
+				"#Soccer", 4000,
+				"#Football", 100,
+				"#Racquetball", 200,
+				"#Pickleball", 300,
+				"#Boxing", 100);
 
 		ArrayList<Tweet> tweets = new ArrayList<>();
 		for (var entry : hashtags.entrySet()) {

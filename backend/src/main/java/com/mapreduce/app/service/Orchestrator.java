@@ -1,12 +1,23 @@
 package com.mapreduce.app.service;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import com.mapreduce.app.data.PartitionStrategy;
@@ -48,7 +59,7 @@ public class Orchestrator {
                     partitionNaiveHash(mappedData);
                     break;
                 case EQUALLY_WEIGHTED:
-                    partitionEquallyWeighted(mappedData);
+                    partitionLoadAware(mappedData);
                     break;
                 default:
                     log.error("Unknown partition strategy!");
@@ -64,58 +75,39 @@ public class Orchestrator {
         }
     }
 
-    public List<Reducer> getAvailableReducers() {
-        List<Reducer> availableReducers = new ArrayList<>();
-        for (var reducer : reducers) {
-            if (!reducer.isRunning()) {
-                availableReducers.add(reducer);
-            }
-        }
-        return availableReducers;
-    }
-
     // Baseline design
     public void partitionNaiveHash(Map<String, Integer> mappedData) throws InterruptedException {
-        var availableReducers = getAvailableReducers();
-        if (availableReducers == null || availableReducers.isEmpty()) {
-            System.err.println("Something went wrong, no reducer is available!");
-            return;
-        }
-
-        for (var entry : mappedData.entrySet()) {
-            var hashtag = entry.getKey();
-            var reducerIndex = Math.abs(hashtag.hashCode()) % availableReducers.size();
-            availableReducers.get(reducerIndex).getQueue()
-                    .put(Map.of(entry.getKey(), entry.getValue()));
+        var keys = mappedData.keySet().toArray();
+        var counter = 0;
+        var hashtagsPerReducer = mappedData.size() / reducers.size();
+        for (int i = 0; i < reducers.size(); i++) {
+            for (var j = 0; j < hashtagsPerReducer; j++) {
+                reducers.get(i).getQueue().put(Map.of((String) keys[counter], mappedData.get((String) keys[counter])));
+                counter++;
+            }
         }
     }
 
-    // Refinement One: Equally distribute workload based on number of keys
-    public void partitionEquallyWeighted(Map<String, Integer> mappedData) throws InterruptedException {
-        var availableReducers = getAvailableReducers();
-        if (availableReducers == null || availableReducers.isEmpty()) {
-            System.err.println("Something went wrong, no reducer is available!");
-            return;
-        }
-        var workloadPerReducer = mappedData.size() / availableReducers.size();
-        var entries = new ArrayList<>(mappedData.entrySet());
-        int entryIndex = 0;
-
-        for (var reducer : availableReducers) {
-            var itemsAdded = 0;
-            while (itemsAdded < workloadPerReducer && entryIndex < entries.size()) {
-                var entry = entries.get(entryIndex);
-                reducer.getQueue().put(Map.of(entry.getKey(), entry.getValue()));
-                itemsAdded++;
-                entryIndex++;
+    // Refinement One
+    public void partitionLoadAware(Map<String, Integer> mappedData) throws InterruptedException {
+        var keys = mappedData.keySet().toArray();
+        var hotKeys = getHotKeys(mappedData,500);
+        var counter = 0;
+        var hashtagsPerReducer = mappedData.size() / reducers.size();
+        for (int i = 0; i < reducers.size(); i++) {
+            for (var j = 0; j < hashtagsPerReducer; j++) {
+                reducers.get(i).getQueue().put(Map.of((String) keys[counter], mappedData.get((String) keys[counter])));
+                counter++;
             }
         }
+    }
 
-        while (entryIndex < entries.size()) {
-            var entry = entries.get(entryIndex);
-            availableReducers.get(availableReducers.size() - 1).getQueue()
-                    .put(Map.of(entry.getKey(), entry.getValue()));
-            entryIndex++;
+    private List<String> getHotKeys(Map<String, Integer> mappedData, int threshold) {
+        var hotKeys = new ArrayList<String>();
+        for(var entry : mappedData.entrySet()) {
+            if(entry.getValue()>=threshold)
+                hotKeys.add(entry.getKey());
         }
+        return hotKeys;
     }
 }

@@ -27,9 +27,9 @@ public class Mapper implements Callable<Map<String, Integer>> {
                                 hashtag -> hashtag,
                                 java.util.stream.Collectors.summingInt(hashtag -> 1)));
         timeSpent = System.currentTimeMillis() - startTime;
-        System.out
-                .println("Mapping finished by " + name + ". Processed " + tweets.size() + " tweets and took "
-                        + timeSpent + "ms");
+        // System.out
+        //         .println("Mapping finished by " + name + ". Processed " + tweets.size() + " tweets and took "
+        //                 + timeSpent + "ms");
         return mapped;
     }
 }

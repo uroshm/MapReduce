@@ -25,14 +25,14 @@ public class Reducer implements Runnable {
     public void run() {
         isRunning = true;
         long startTime = System.currentTimeMillis();
-        
+
         try {
             while (true) {
                 Map<String, Integer> batch = queue.poll(POLL_TIME_SECONDS, TimeUnit.SECONDS);
                 if (batch == null)
                     break;
                 for (var e : batch.entrySet()) {
-                    Thread.sleep(Duration.ofMillis(100));
+                    Thread.sleep(e.getValue());
                     result.merge(e.getKey(), e.getValue(), Integer::sum);
                     recordsProcessed++;
                 }
@@ -45,6 +45,7 @@ public class Reducer implements Runnable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
+            System.out.println("Done running with reducer" + getName());
             isRunning = false;
         }
     }
