@@ -62,25 +62,9 @@ Example:
 {"user": "alice", "action": "logout"}'></textarea>
       </div>
 
-      <div class="input-group">
-        <label for="map-function">Map Function</label>
-        <textarea id="map-function" rows="4" placeholder='function map(key, value) {
-  // Your map logic here
-  return [[key, 1]];
-}'></textarea>
-      </div>
-
-      <div class="input-group">
-        <label for="reduce-function">Reduce Function</label>
-        <textarea id="reduce-function" rows="4" placeholder='function reduce(key, values) {
-  // Your reduce logic here
-  return values.reduce((a, b) => a + b, 0);
-}'></textarea>
-      </div>
-
       <div class="button-group">
         <button class="btn-primary" id="submit-job">
-          <span id="submit-text">Submit Job</span>
+          <span id="submit-text">Run MapReduce</span>
         </button>
         <button id="clear-btn">Clear</button>
       </div>
@@ -115,7 +99,7 @@ document.getElementById('submit-job').addEventListener('click', async () => {
   const submitBtn = document.getElementById('submit-job');
   const submitText = document.getElementById('submit-text');
   const resultsDiv = document.getElementById('results');
-  
+
   const jobName = document.getElementById('job-name').value;
   const inputData = document.getElementById('input-data').value;
   const mapFunc = document.getElementById('map-function').value;
@@ -128,7 +112,7 @@ document.getElementById('submit-job').addEventListener('click', async () => {
 
   submitBtn.disabled = true;
   submitText.innerHTML = '<span class="loading"></span> Processing...';
-  
+
   // Simulate job execution
   activeJobs++;
   partitions = Math.floor(Math.random() * 8) + 4;
