@@ -21,8 +21,8 @@ RUN npm install express
 COPY server.js ./
 
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV PORT=5173
 
-EXPOSE 8080
+EXPOSE 5173
 
 CMD ["node", "server.js"]
