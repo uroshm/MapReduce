@@ -53,7 +53,7 @@ public class Orchestrator {
         for (var future : futures) {
             var mappedData = future.get();
             switch (partitionStrategy) {
-                case NAIVE_HASH:
+                case NAIVE:
                     partitionNaiveHash(mappedData);
                     break;
                 case EQUALLY_WEIGHTED:
@@ -63,6 +63,11 @@ public class Orchestrator {
                     log.error("Unknown partition strategy!");
             }
         }
+        reducers.forEach(reducer -> {
+            var thread = new Thread(reducer);
+            thread.start();
+        });
+
     }
 
     public void initializeReducers(int numberOfReducers) {
@@ -112,17 +117,20 @@ public class Orchestrator {
     public String collectResults() {
         var builder = new StringBuilder();
         try {
-            Thread.sleep(10000);
             reducers.forEach(reducer -> {
-                reducer.getResult().forEach((key, value) -> {
-                    builder.append(
-                            reducer.getName() + " ;; timeSpent: " + reducer.getTimeSpent() + "ms ;; " + key + ": "
-                                    + value);
-                });
+                if (reducer.getQueue().isEmpty()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                builder.append(
+                        reducer.getName() + " spent " + reducer.getTimeSpent() + "ms reducing records: "
+                                + reducer.getResult().toString() + "\n");
             });
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } finally {
+            mapperPool.shutdownNow();
         }
         return builder.toString();
     }

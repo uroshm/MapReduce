@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,7 @@ class AppApplicationTests {
 		var tweets = generateTweets();
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
-		orchestrator.runMapReduce(PartitionStrategy.NAIVE_HASH);
+		orchestrator.runMapReduce(PartitionStrategy.NAIVE);
 		orchestrator.getReducers().forEach(reducer -> {
 			var thread = new Thread(reducer);
 			thread.start();
@@ -76,8 +74,6 @@ class AppApplicationTests {
 			int count = entry.getValue();
 			for (int i = 0; i < count; i++) {
 				var tweet = new Tweet();
-				tweet.setId(UUID.randomUUID());
-				tweet.setUser("user" + i % 1000);
 				tweet.setHashtag(entry.getKey());
 				tweet.setMessage("I love this sport!");
 				tweets.add(tweet);

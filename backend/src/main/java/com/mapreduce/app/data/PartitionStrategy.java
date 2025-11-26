@@ -1,6 +1,6 @@
 package com.mapreduce.app.data;
 
 public enum PartitionStrategy {
-    NAIVE_HASH,
+    NAIVE,
     EQUALLY_WEIGHTED
 }
