@@ -49,11 +49,6 @@ document.querySelector('#app').innerHTML = `
       <h2>Submit MapReduce Job</h2>
       
       <div class="input-group">
-        <label for="job-name">Job Name</label>
-        <input type="text" id="job-name" placeholder="word_count_2024" />
-      </div>
-
-      <div class="input-group">
         <label for="input-data">Input Data</label>
         <textarea id="input-data" rows="6" placeholder='Enter your data here or paste JSON...
 Example:
@@ -66,7 +61,7 @@ Example:
         <button class="btn-primary" id="submit-job">
           <span id="submit-text">Run MapReduce</span>
         </button>
-        <button id="clear-btn">Clear</button>
+        <button id="clear-btn" onclick="document.getElementById('input-data').value = '';">Clear</button>
       </div>
     </div>
 
@@ -105,7 +100,7 @@ document.getElementById('submit-job').addEventListener('click', async () => {
   const mapFunc = document.getElementById('map-function').value;
   const reduceFunc = document.getElementById('reduce-function').value;
 
-  if (!jobName || !inputData || !mapFunc || !reduceFunc) {
+  if (!inputData) {
     resultsDiv.innerHTML = '<span style="color: #ff3333;">❌ Please fill in all fields</span>';
     return;
   }
