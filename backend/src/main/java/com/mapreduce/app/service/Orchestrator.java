@@ -130,7 +130,8 @@ public class Orchestrator {
                                 + reducer.getResult().toString() + "\n");
             });
         } finally {
-            mapperPool.shutdownNow();
+            if (mapperPool != null && !mapperPool.isShutdown())
+                mapperPool.shutdownNow();
         }
         return builder.toString();
     }
