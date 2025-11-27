@@ -1,19 +1,61 @@
 import './style.css'
 
-// Create animated background particles
-function createParticles() {
-  const container = document.querySelector('.background-animation');
-  for (let i = 0; i < 30; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particle.style.left = Math.random() * 100 + '%';
-    particle.style.top = Math.random() * 100 + '%';
-    particle.style.animationDelay = Math.random() * 15 + 's';
-    particle.style.animationDuration = (10 + Math.random() * 10) + 's';
-    container.appendChild(particle);
+var isRunning = false;
+
+
+async function updateResults() {
+  try {
+    const resultsElement = document.getElementById('results');
+    if (!resultsElement) {
+      console.error('Results element not found');
+      return;
+    }
+
+    const response = await fetch('http://localhost:8080/getResults', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.text();
+    const resultsText = data.toString();
+    resultsElement.innerHTML = `<pre style="margin: 0; color: #ca85eaff;">${resultsText}</pre>`;
+  } catch (error) {
+    console.error('Error in updateResults:', error);
   }
 }
 
+async function submitMapReduceJob() {
+  if (isRunning) {
+    return;
+  }
+  isRunning = true;
+
+  const response = await fetch('http://localhost:8080/process'
+    + '?numberOfMappers=2&numberOfReducers=2&partitionStrategy=NAIVE', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(
+      {
+        "#Basketball": 200,
+        "#Soccer": 8000,
+        "#Football": 100,
+        "#Racquetball": 200,
+        "#Pickleball": 300,
+        "#Boxing": 100,
+      }),
+  });
+
+  const data = await response.json();
+  console.log(data);
+}
 // Initialize the app
 document.querySelector('#app').innerHTML = `
   <div class="background-animation"></div>
@@ -61,7 +103,7 @@ Example:
         <button class="btn-primary" id="submit-job">
           <span id="submit-text">Run MapReduce</span>
         </button>
-        <button id="clear-btn" onclick="document.getElementById('input-data').value = '';">Clear</button>
+        <button id="clear-btn">Clear</button>
       </div>
     </div>
 
@@ -74,7 +116,10 @@ Example:
   </div>
 `
 
-createParticles();
+// createParticles();
+
+// Attach event listeners
+document.getElementById('submit-job').addEventListener('click', submitMapReduceJob);
 
 // Simulate stats update
 let activeJobs = 0;
@@ -89,72 +134,9 @@ function updateStats() {
   document.getElementById('total-processed').textContent = totalProcessed.toLocaleString();
 }
 
-// Handle job submission
-document.getElementById('submit-job').addEventListener('click', async () => {
-  const submitBtn = document.getElementById('submit-job');
-  const submitText = document.getElementById('submit-text');
-  const resultsDiv = document.getElementById('results');
-
-  const jobName = document.getElementById('job-name').value;
-  const inputData = document.getElementById('input-data').value;
-  const mapFunc = document.getElementById('map-function').value;
-  const reduceFunc = document.getElementById('reduce-function').value;
-
-  if (!inputData) {
-    resultsDiv.innerHTML = '<span style="color: #ff3333;">❌ Please fill in all fields</span>';
-    return;
-  }
-
-  submitBtn.disabled = true;
-  submitText.innerHTML = '<span class="loading"></span> Processing...';
-
-  // Simulate job execution
-  activeJobs++;
-  partitions = Math.floor(Math.random() * 8) + 4;
-  throughput = Math.random() * 50 + 10;
-  updateStats();
-
-  resultsDiv.innerHTML = `<span style="color: #39ff14;">⚡ Job "${jobName}" submitted...</span>
-<span style="color: #a0a0a0;">Analyzing data distribution...</span>
-<span style="color: #a0a0a0;">Creating ${partitions} intelligent partitions...</span>
-<span style="color: #a0a0a0;">Running map phase...</span>`;
-
-  // Simulate processing delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  resultsDiv.innerHTML += `
-<span style="color: #a0a0a0;">Running reduce phase...</span>
-<span style="color: #39ff14;">✓ Job completed successfully!</span>
-
-<span style="color: #7fff00;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
-<span style="color: #e0e0e0;">Job: ${jobName}</span>
-<span style="color: #e0e0e0;">Partitions Used: ${partitions}</span>
-<span style="color: #e0e0e0;">Processing Time: ${(Math.random() * 5 + 1).toFixed(2)}s</span>
-<span style="color: #e0e0e0;">Data Processed: ${(Math.random() * 100 + 50).toFixed(1)} MB</span>
-<span style="color: #7fff00;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
-
-<span style="color: #39ff14;">Sample Results:</span>
-<span style="color: #a0a0a0;">{</span>
-<span style="color: #a0a0a0;">  "key_1": 42,</span>
-<span style="color: #a0a0a0;">  "key_2": 37,</span>
-<span style="color: #a0a0a0;">  "key_3": 58</span>
-<span style="color: #a0a0a0;">}</span>`;
-
-  activeJobs--;
-  totalProcessed += Math.floor(Math.random() * 1000 + 500);
-  updateStats();
-
-  submitBtn.disabled = false;
-  submitText.textContent = 'Submit Job';
-});
-
 // Handle clear button
 document.getElementById('clear-btn').addEventListener('click', () => {
-  document.getElementById('job-name').value = '';
   document.getElementById('input-data').value = '';
-  document.getElementById('map-function').value = '';
-  document.getElementById('reduce-function').value = '';
-  document.getElementById('results').innerHTML = '<span style="color: #666;">Job results will appear here...</span>';
 });
 
 // Initialize stats
@@ -167,3 +149,11 @@ setInterval(() => {
   }
   updateStats();
 }, 2000);
+
+setInterval(async () => {
+  try {
+    await updateResults();
+  } catch (error) {
+    console.error('Error updating results:', error);
+  }
+}, 500);
