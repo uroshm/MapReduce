@@ -17,9 +17,11 @@ import com.mapreduce.app.service.Orchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -28,16 +30,16 @@ public class Controller {
     private final Orchestrator orchestrator;
 
     @PostMapping("process")
-    public String processTweets(@RequestBody Map<String, Integer> hashtagCounts,
+    public HttpStatus processTweets(@RequestBody Map<String, Integer> hashtagCounts,
             @RequestParam int numberOfMappers,
             @RequestParam int numberOfReducers,
             @RequestParam String partitionStrategy) {
         processAsync(hashtagCounts, numberOfMappers, numberOfReducers, partitionStrategy);
-        return "Processing started. Use /getStatus to check progress and /getResults to retrieve results.";
+        return HttpStatus.OK;
     }
 
     @Async
-    public void processAsync(Map<String, Integer> hashtagCounts, int numberOfMappers, 
+    public void processAsync(Map<String, Integer> hashtagCounts, int numberOfMappers,
             int numberOfReducers, String partitionStrategy) {
         try {
             orchestrator.reset();
