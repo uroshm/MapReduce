@@ -45,7 +45,7 @@ public class Reducer implements Runnable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
-            System.out.println("Done running with reducer" + getName());
+            System.out.println("Done reducing with " + getName());
             isRunning = false;
         }
     }
