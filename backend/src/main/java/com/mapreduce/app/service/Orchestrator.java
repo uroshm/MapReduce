@@ -25,6 +25,7 @@ public class Orchestrator {
     ExecutorService mapperPool = null;
 
     public void reset() {
+        log.info("Orchestrator resetting...");
         mappers = new ArrayList<>();
         reducers = new ArrayList<>();
         reducerQueues = new ArrayList<>();
@@ -57,7 +58,7 @@ public class Orchestrator {
                     partitionNaiveHash(mappedData);
                     break;
                 case EQUALLY_WEIGHTED:
-                    partitionLoadAware(mappedData);
+                    partitionSmart(mappedData);
                     break;
                 default:
                     log.error("Unknown partition strategy!");
@@ -92,7 +93,7 @@ public class Orchestrator {
     }
 
     // Refinement One
-    public void partitionLoadAware(Map<String, Integer> mappedData) throws InterruptedException {
+    public void partitionSmart(Map<String, Integer> mappedData) throws InterruptedException {
         var keys = mappedData.keySet().toArray();
         var hotKeys = getHotKeys(mappedData, 500);
         var counter = 0;

@@ -20,47 +20,26 @@ class AppApplicationTests {
 	private Orchestrator orchestrator;
 
 	@Test
-	@Disabled
 	void partitionNaiveHash() throws Exception {
 		var tweets = generateTweets();
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
 		orchestrator.runMapReduce(PartitionStrategy.NAIVE);
-		orchestrator.getReducers().forEach(reducer -> {
-			var thread = new Thread(reducer);
-			thread.start();
-		});
-
-		printResults();
+		Thread.sleep(8000);
+		System.out.println(orchestrator.collectResults());
 	}
 
 	@Test
-	@Disabled
-	void partitionImproved() throws Exception {
+	void partitionSmart() throws Exception {
 		var tweets = generateTweets();
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
 		orchestrator.runMapReduce(PartitionStrategy.EQUALLY_WEIGHTED);
-		orchestrator.getReducers().forEach(reducer -> {
-			var thread = new Thread(reducer);
-			thread.start();
-		});
-
-		printResults();
-	}
-
-	private void printResults() throws InterruptedException {
-		Thread.sleep(10000);
-		orchestrator.getReducers().forEach(reducer -> {
-			reducer.getResult().forEach((key, value) -> {
-				System.out.println(
-						reducer.getName() + " ;; timeSpent: " + reducer.getTimeSpent() + "ms ;; " + key + ": " + value);
-			});
-		});
+		Thread.sleep(8000);
+		System.out.println(orchestrator.collectResults());
 	}
 
 	private List<Tweet> generateTweets() {
-
 		Map<String, Integer> hashtags = Map.of(
 				"#Basketball", 200,
 				"#Soccer", 4000,
