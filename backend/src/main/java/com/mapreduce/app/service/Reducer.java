@@ -39,9 +39,6 @@ public class Reducer implements Runnable {
             }
 
             timeSpent = System.currentTimeMillis() - startTime;
-            System.out
-                    .println("Reducing by " + name + " finished. Processed " + result.size() + " hashtags and took "
-                            + timeSpent + "ms");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
