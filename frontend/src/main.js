@@ -8,7 +8,7 @@ document.querySelector('#app').innerHTML = `
   <div class="header">
     <div class="logo-section">
       <span class="logo"><img src="/logo.png" alt="Elephlow Logo" /></span>
-      <h1>Elephlow</h1>
+      <h2>Elephlow</h2>
     </div>
     <p class="tagline">MapReduce with Smart Partitioning to address Hot/Cold HashTags</p>
   </div>
