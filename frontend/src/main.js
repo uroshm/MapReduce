@@ -33,7 +33,7 @@ document.querySelector('#app').innerHTML = `
         <label for="partition-strategy">Partition Strategy</label>
         <select id="partition-strategy">
           <option value="NAIVE">NAIVE</option>
-          <option value="EQUALLY_WEIGHTED">EQUALLY_WEIGHTED</option>
+          <option value="SMAERT">SMART</option>
         </select>
       </div>
 
