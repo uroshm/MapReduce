@@ -18,12 +18,11 @@ document.querySelector('#app').innerHTML = `
       
       <div class="input-group">
         <label for="input-data">Input Data</label>
-        <textarea id="input-data" rows="6" placeholder='Enter your data here or paste JSON...
-        Example:
+        <textarea id="input-data" rows="4" placeholder='Example:
         {
           "Basketball": 200,
           "Soccer":400
-        }</textarea>
+        }
 
         <label for="input-data">Number of Mappers</label>
         <textarea id="input-mappers" rows="1" placeholder='Number of Mappers'></textarea>        
