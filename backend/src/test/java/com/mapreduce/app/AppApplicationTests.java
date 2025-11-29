@@ -30,6 +30,16 @@ class AppApplicationTests {
 	}
 
 	@Test
+	void partitionNaiveHashMediumScenario() throws Exception {
+		var tweetsHardScenario = getHashtagData(hashtagsMediumScenario);
+		orchestrator.initializeMappers(tweetsHardScenario, 4);
+		orchestrator.initializeReducers(2);
+		orchestrator.runMapReduce(PartitionStrategy.NAIVE);
+		Thread.sleep(8000);
+		System.out.println(orchestrator.collectResults());
+	}
+
+	@Test
 	void partitionNaiveHashEasyScenario() throws Exception {
 		var tweetsHardScenario = getHashtagData(hashtagsEasyScenario);
 		orchestrator.initializeMappers(tweetsHardScenario, 4);
@@ -39,10 +49,8 @@ class AppApplicationTests {
 		System.out.println(orchestrator.collectResults());
 	}
 
-
-
 	@Test
-	void partitionSmart() throws Exception {
+	void partitionSmartHard() throws Exception {
 		var tweets = getHashtagData(hashtagsHardScenario);
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
@@ -61,7 +69,7 @@ class AppApplicationTests {
 
 	Map<String, Integer> hashtagsMediumScenario = Map.of(
 			"#Basketball", 200,
-			"#Soccer", 1000,
+			"#Soccer", 500,
 			"#Football", 100,
 			"#Racquetball", 200,
 			"#Pickleball", 300,
@@ -73,7 +81,7 @@ class AppApplicationTests {
 			"#Football", 200,
 			"#Racquetball", 200,
 			"#Pickleball", 200,
-			"#Boxing", 200);			
+			"#Boxing", 200);
 
 	private List<Tweet> getHashtagData(Map<String, Integer> hashtags) {
 		ArrayList<Tweet> tweets = new ArrayList<>();
