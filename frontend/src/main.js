@@ -57,7 +57,7 @@ document.getElementById('submit-job').addEventListener('click', submitMapReduceJ
 document.getElementById('clear-btn').addEventListener('click', () => {
   isRunning = false;
   document.getElementById('input-data').value = '';
-  document.getElementById('results').innerHTML = '<span style="color: #666;">Job results will appear here...</span>';
+  document.getElementById('results').innerHTML = '<span style="color: #666;">Job results</span>';
   const response = fetch('http://localhost:8080/reset', {
     method: 'POST',
     headers: {
