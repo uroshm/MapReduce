@@ -3,6 +3,7 @@ package com.mapreduce.app.service;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import com.mapreduce.app.data.Tweet;
 
@@ -18,14 +19,14 @@ public class Mapper implements Callable<Map<String, Integer>> {
 
     @Override
     public Map<String, Integer> call() throws Exception {
-        long startTime = System.currentTimeMillis();
+        var startTime = System.currentTimeMillis();
         var mapped = tweets.stream()
                 .map(Tweet::getHashtag)
                 .filter(hashtag -> !hashtag.isEmpty())
                 .collect(
-                        java.util.stream.Collectors.groupingBy(
+                        Collectors.groupingBy(
                                 hashtag -> hashtag,
-                                java.util.stream.Collectors.summingInt(hashtag -> 1)));
+                                Collectors.summingInt(hashtag -> 1)));
         timeSpent = System.currentTimeMillis() - startTime;
         return mapped;
     }
