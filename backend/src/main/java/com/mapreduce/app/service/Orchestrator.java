@@ -79,8 +79,7 @@ public class Orchestrator {
         }
     }
 
-    // Baseline design
-    public void partitionNaiveHash(Map<String, Integer> mappedData) throws InterruptedException {
+    public void partitionBaseline(Map<String, Integer> mappedData) throws InterruptedException {
         var keys = mappedData.keySet().toArray();
         var counter = 0;
         var hashtagsPerReducer = mappedData.size() / reducers.size();
