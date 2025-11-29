@@ -61,7 +61,7 @@ class AppApplicationTests {
 
 	Map<String, Integer> hashtagsMediumScenario = Map.of(
 			"#Basketball", 200,
-			"#Soccer", 4000,
+			"#Soccer", 1000,
 			"#Football", 100,
 			"#Racquetball", 200,
 			"#Pickleball", 300,
