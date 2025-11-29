@@ -20,9 +20,10 @@ document.querySelector('#app').innerHTML = `
         <label for="input-data">Input Data</label>
         <textarea id="input-data" rows="6" placeholder='Enter your data here or paste JSON...
         Example:
-        {"user": "alice", "action": "login"}
-        {"user": "bob", "action": "purchase"}
-        {"user": "alice", "action": "logout"}'></textarea>
+        {
+          "Basketball": 200,
+          "Soccer":400
+        }</textarea>
 
         <label for="input-data">Number of Mappers</label>
         <textarea id="input-mappers" rows="1" placeholder='Number of Mappers'></textarea>        
