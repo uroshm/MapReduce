@@ -31,6 +31,7 @@ public class Orchestrator {
         log.info("Orchestrator resetting...");
         mappers = new ArrayList<>();
         reducers = new ArrayList<>();
+        spotReducers = new ArrayList<>();
         reducerQueues = new ArrayList<>();
         if (mapperPool != null && !mapperPool.isShutdown()) {
             mapperPool.shutdownNow();
