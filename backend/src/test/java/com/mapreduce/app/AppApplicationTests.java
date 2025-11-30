@@ -58,6 +58,26 @@ class AppApplicationTests {
 		System.out.println(orchestrator.collectResults());
 	}
 
+	@Test
+	void partitionSmartMedium() throws Exception {
+		var tweets = getHashtagData(hashtagsMediumScenario);
+		orchestrator.initializeMappers(tweets, 4);
+		orchestrator.initializeReducers(2);
+		orchestrator.runMapReduce(PartitionStrategy.SMART);
+		Thread.sleep(10000);
+		System.out.println(orchestrator.collectResults());
+	}
+
+	@Test
+	void partitionSmartEasy() throws Exception {
+		var tweets = getHashtagData(hashtagsEasyScenario);
+		orchestrator.initializeMappers(tweets, 4);
+		orchestrator.initializeReducers(2);
+		orchestrator.runMapReduce(PartitionStrategy.SMART);
+		Thread.sleep(10000);
+		System.out.println(orchestrator.collectResults());
+	}
+
 	Map<String, Integer> hashtagsHardScenario = Map.of(
 			"#Basketball", 200,
 			"#Soccer", 4000,
