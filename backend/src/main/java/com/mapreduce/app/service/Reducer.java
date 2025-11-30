@@ -28,11 +28,13 @@ public class Reducer implements Runnable {
         try {
             while (true) {
                 Map<String, Integer> batch = queue.poll(POLL_TIME_SECONDS, TimeUnit.SECONDS);
+
                 if (batch == null)
                     break;
                 for (var e : batch.entrySet()) {
                     Thread.sleep(e.getValue());
                     result.merge(e.getKey(), e.getValue(), Integer::sum);
+                    System.out.println(this.getName() + " " + e.getValue() + " "+System.currentTimeMillis());
                     recordsProcessed++;
                 }
             }

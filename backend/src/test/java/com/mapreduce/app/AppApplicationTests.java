@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +24,7 @@ class AppApplicationTests {
 		orchestrator.initializeMappers(tweetsHardScenario, 4);
 		orchestrator.initializeReducers(2);
 		orchestrator.runMapReduce(PartitionStrategy.NAIVE);
-		Thread.sleep(10000);
+		Thread.sleep(15000);
 		System.out.println(orchestrator.collectResults());
 	}
 
