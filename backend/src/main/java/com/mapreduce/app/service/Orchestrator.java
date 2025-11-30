@@ -1,8 +1,10 @@
 package com.mapreduce.app.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Orchestrator {
     List<Mapper> mappers = new ArrayList<>();
     List<Reducer> reducers = new ArrayList<>();
+    List<Reducer> spotReducers = new ArrayList<>();
     List<BlockingQueue<Map<String, Integer>>> reducerQueues = new ArrayList<>();
     ExecutorService mapperPool = null;
 
@@ -55,9 +58,9 @@ public class Orchestrator {
             var mappedData = future.get();
             switch (partitionStrategy) {
                 case NAIVE:
-                    partitionNaiveHash(mappedData);
+                    partitionBaseline(mappedData);
                     break;
-                case EQUALLY_WEIGHTED:
+                case SMART:
                     partitionSmart(mappedData);
                     break;
                 default:
@@ -68,7 +71,6 @@ public class Orchestrator {
             var thread = new Thread(reducer);
             thread.start();
         });
-
     }
 
     public void initializeReducers(int numberOfReducers) {
@@ -91,17 +93,46 @@ public class Orchestrator {
         }
     }
 
-    // Refinement One
+    private static final int HOTKEY_THRESHOLD = 500;
+
     public void partitionSmart(Map<String, Integer> mappedData) throws InterruptedException {
-        var keys = mappedData.keySet().toArray();
-        var hotKeys = getHotKeys(mappedData, 500);
+        var mappedDataRegular = new HashMap<String, Integer>();
+        var mappedDataHot = new HashMap<String, Integer>();
+        var hotKeys = getHotKeys(mappedData, HOTKEY_THRESHOLD);
+
+        for (var key : mappedData.keySet()) {
+            if (!hotKeys.contains(key)) {
+                mappedDataRegular.put(key, mappedData.get(key));
+            } else {
+                mappedDataHot.put(key, mappedData.get(key));
+            }
+        }
+
+        runSpotReducers(mappedDataHot);
+
         var counter = 0;
-        var hashtagsPerReducer = mappedData.size() / reducers.size();
+        var hashtagsPerReducer = mappedDataRegular.size() / reducers.size();
+        var keysNew = mappedDataRegular.keySet().toArray();
         for (int i = 0; i < reducers.size(); i++) {
-            for (var j = 0; j < hashtagsPerReducer; j++) {
-                reducers.get(i).getQueue().put(Map.of((String) keys[counter], mappedData.get((String) keys[counter])));
+            for (int j = 0; j < hashtagsPerReducer; j++) {
+                reducers.get(i).getQueue()
+                        .put(Map.of((String) keysNew[counter],
+                                mappedDataRegular.get((String) keysNew[counter])));
                 counter++;
             }
+        }
+    }
+
+    private void runSpotReducers(HashMap<String, Integer> mappedDataHot) throws InterruptedException {
+        for (var e : mappedDataHot.entrySet()) {
+            var newReducer = new Reducer("spotInstance" + new Random().nextInt(100));
+            newReducer.getQueue().put(Map.of(e.getKey(), e.getValue()));
+            spotReducers.add(newReducer);
+        }
+
+        for (var spotReducer : spotReducers) {
+            var spotThread = new Thread(spotReducer);
+            spotThread.start();
         }
     }
 
@@ -118,6 +149,18 @@ public class Orchestrator {
         var builder = new StringBuilder();
         try {
             reducers.forEach(reducer -> {
+                if (reducer.getQueue().isEmpty()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                builder.append(
+                        reducer.getName() + " spent " + reducer.getTimeSpent() + "ms reducing records: "
+                                + reducer.getResult().toString() + "\n");
+            });
+            spotReducers.forEach(reducer -> {
                 if (reducer.getQueue().isEmpty()) {
                     try {
                         Thread.sleep(100);

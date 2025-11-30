@@ -54,7 +54,7 @@ class AppApplicationTests {
 		var tweets = getHashtagData(hashtagsHardScenario);
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
-		orchestrator.runMapReduce(PartitionStrategy.EQUALLY_WEIGHTED);
+		orchestrator.runMapReduce(PartitionStrategy.SMART);
 		Thread.sleep(8000);
 		System.out.println(orchestrator.collectResults());
 	}
