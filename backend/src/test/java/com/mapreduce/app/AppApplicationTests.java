@@ -25,7 +25,7 @@ class AppApplicationTests {
 		orchestrator.initializeMappers(tweetsHardScenario, 4);
 		orchestrator.initializeReducers(2);
 		orchestrator.runMapReduce(PartitionStrategy.NAIVE);
-		Thread.sleep(8000);
+		Thread.sleep(10000);
 		System.out.println(orchestrator.collectResults());
 	}
 
@@ -35,7 +35,7 @@ class AppApplicationTests {
 		orchestrator.initializeMappers(tweetsHardScenario, 4);
 		orchestrator.initializeReducers(2);
 		orchestrator.runMapReduce(PartitionStrategy.NAIVE);
-		Thread.sleep(8000);
+		Thread.sleep(10000);
 		System.out.println(orchestrator.collectResults());
 	}
 
@@ -45,7 +45,7 @@ class AppApplicationTests {
 		orchestrator.initializeMappers(tweetsHardScenario, 4);
 		orchestrator.initializeReducers(2);
 		orchestrator.runMapReduce(PartitionStrategy.NAIVE);
-		Thread.sleep(8000);
+		Thread.sleep(10000);
 		System.out.println(orchestrator.collectResults());
 	}
 
@@ -55,7 +55,7 @@ class AppApplicationTests {
 		orchestrator.initializeMappers(tweets, 4);
 		orchestrator.initializeReducers(2);
 		orchestrator.runMapReduce(PartitionStrategy.SMART);
-		Thread.sleep(8000);
+		Thread.sleep(10000);
 		System.out.println(orchestrator.collectResults());
 	}
 
